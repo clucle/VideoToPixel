@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Pixel Video Generator</title>
+  <meta name="description" content="Convert Video to PixelVideo">
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
+</head>
+
+<body>
+  <div>
+    <input type="file" onchange="readURL(this);"></input>
+    <br>
+    <video id="video" width="800" height="450" src="resources/video.mp4" autoplay muted loop></video>
+    <canvas id="output-canvas" width="800" height="450"></canvas>
+  </div>
+</body>
+
+<script>
+  let video, ctx_out, c_tmp, ctx_tmp;
+  let doOnce = true;
+
+  function readURL(input) {
+    if (input.files && input.files[0]) {
+      let reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("video").setAttribute("src", e.target.result);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function init() {
+    video = document.getElementById("video");
+    ctx_out = document.getElementById("output-canvas").getContext("2d");
+
+    canvas_tmp = document.createElement("canvas");
+    canvas_tmp.setAttribute("width", 800);
+    canvas_tmp.setAttribute("height", 450);
+    ctx_tmp = canvas_tmp.getContext("2d");
+
+    video.addEventListener("play", computeFrame);
+  }
+
+  function computeFrame() {
+    ctx_tmp.drawImage(video, 0, 0, video.width, video.height);
+    let frame = ctx_tmp.getImageData(0, 0, video.width, video.height);
+
+    const pixel_size = 16;
+
+    for (let i = 0; i < frame.data.length / 4; i++) {
+      let y = Math.floor(Math.floor(i / video.width) / pixel_size) * pixel_size;
+      let x = Math.floor(Math.floor(i % video.width) / pixel_size) * pixel_size;
+      let pos_src = Math.floor(y * video.width + x);
+
+      let r = frame.data[i * 4 + 0];
+      let g = frame.data[i * 4 + 1];
+      let b = frame.data[i * 4 + 2];
+
+      frame.data[i * 4 + 0] = frame.data[pos_src * 4 + 0];
+      frame.data[i * 4 + 1] = frame.data[pos_src * 4 + 1];
+      frame.data[i * 4 + 2] = frame.data[pos_src * 4 + 2];
+    }
+
+    ctx_out.putImageData(frame, 0, 0);
+    setTimeout(computeFrame, 0);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+  });
+</script>
+
+</html>
