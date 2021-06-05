@@ -12,6 +12,10 @@ body {
   padding: 8px;
 }
 
+footer {
+    text-align: right;
+}
+
 h1,
 h2 {
   font-family: Arial, Helvetica, sans-serif;
