@@ -19,6 +19,11 @@ body {
     text-align: center;
 }
 
+.container-center {
+    width: 100%;
+    text-align: center;
+}
+
 .container-video {
     width: 800px;
 }

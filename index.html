@@ -30,8 +30,10 @@
     </select>
     <h2>3. Enjoy.</h2>
     <br>
-    <video id="video" class="container-video" width="800" height="450" src="resources/sample.mp4" muted controls></video>
-    <canvas id="output-canvas" class="container-video" width="800" height="450"></canvas>
+    <div class="container-center">
+      <video id="video" class="container-video" width="800" height="450" src="resources/sample.mp4" muted controls></video>
+      <canvas id="output-canvas" class="cowrap_line_lengthntainer-video" width="800" height="450"></canvas>
+    </div>
   </div>
 
   <footer><small>Copyright &copy; 2021 clucle. All Rights Reserved</small></footer>
@@ -45,7 +47,7 @@
   function readURL(input) {
     if (input.files && input.files[0]) {
       let reader = new FileReader();
-      reader.onload = function (e) {
+      reader.onload = function(e) {
         document.getElementById("video").setAttribute("src", e.target.result);
       };
       reader.readAsDataURL(input.files[0]);
