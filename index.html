@@ -14,21 +14,23 @@
 <body>
   <div>
     <h1 class="pixel-font text-center">Convert Video To Pixel</h1>
-    <h2>1. Select the video to be pixelated.</h2>
-    <input type="file" onchange="readURL(this);"></input>
-    <h2>2. Set pixel size.</h2>
-    <select id="pixel-size" onchange="changePixelSize(this);">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="4">4</option>
-      <option value="8">8</option>
-      <option value="16">16</option>
-      <option value="32">32</option>
-      <option value="48" selected>48</option>
-      <option value="64">64</option>
-      <option value="128">128</option>
-    </select>
-    <h2>3. Enjoy.</h2>
+    <div class="container-margin-32px">
+      <h2>1. Select the video to be pixelated.</h2>
+      <input type="file" onchange="readURL(this);"></input>
+      <h2>2. Set pixel size.</h2>
+      <select id="pixel-size" onchange="changePixelSize(this);">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="4">4</option>
+        <option value="8">8</option>
+        <option value="16">16</option>
+        <option value="32">32</option>
+        <option value="48" selected>48</option>
+        <option value="64">64</option>
+        <option value="128">128</option>
+      </select>
+      <h2>3. Enjoy.</h2>
+    </div>
     <br>
     <div class="container-center">
       <video id="video" class="container-video" width="800" height="450" src="resources/sample.mp4" muted controls></video>
