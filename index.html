@@ -13,6 +13,18 @@
   <div>
     <input type="file" onchange="readURL(this);"></input>
     <br>
+    <select id="pixel-size" onchange="changePixelSize(this);">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="4">4</option>
+      <option value="8">8</option>
+      <option value="16">16</option>
+      <option value="32">32</option>
+      <option value="48" selected>48</option>
+      <option value="64">64</option>
+      <option value="128">128</option>
+    </select>
+    <br>
     <video id="video" width="800" height="450" src="resources/sample.mp4" autoplay muted loop></video>
     <canvas id="output-canvas" width="800" height="450"></canvas>
   </div>
@@ -21,15 +33,25 @@
 <script>
   let video, ctx_out, c_tmp, ctx_tmp;
   let doOnce = true;
+  let pixel_size = 32;
 
   function readURL(input) {
     if (input.files && input.files[0]) {
       let reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         document.getElementById("video").setAttribute("src", e.target.result);
       };
       reader.readAsDataURL(input.files[0]);
     }
+  }
+
+  function changePixelSize(event) {
+    let pixel_size_num = event.value * 1;
+    if (typeof pixel_size_num != "number") {
+      alert("pixel size error");
+      return;
+    }
+    pixel_size = pixel_size_num;
   }
 
   function init() {
@@ -45,15 +67,24 @@
   }
 
   function computeFrame() {
-    ctx_tmp.drawImage(video, 0, 0, video.width, video.height);
-    let frame = ctx_tmp.getImageData(0, 0, video.width, video.height);
 
-    const pixel_size = 16;
+    let videoRatio = video.videoWidth / video.videoHeight;
+    let width = video.offsetWidth;
+    let height = video.offsetHeight;
+    let elmementRatio = width / height;
+
+    if (elmementRatio > videoRatio)
+      width = height * videoRatio;
+    else
+      height = width / videoRatio;
+
+    ctx_tmp.drawImage(video, 0, 0, width, height);
+    let frame = ctx_tmp.getImageData(0, 0, width, height);
 
     for (let i = 0; i < frame.data.length / 4; i++) {
-      let y = Math.floor(Math.floor(i / video.width) / pixel_size) * pixel_size;
-      let x = Math.floor(Math.floor(i % video.width) / pixel_size) * pixel_size;
-      let pos_src = Math.floor(y * video.width + x);
+      let y = Math.floor(Math.floor(i / width) / pixel_size) * pixel_size;
+      let x = Math.floor(Math.floor(i % width) / pixel_size) * pixel_size;
+      let pos_src = Math.floor(y * width + x);
 
       let r = frame.data[i * 4 + 0];
       let g = frame.data[i * 4 + 1];
