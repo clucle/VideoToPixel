@@ -3,9 +3,12 @@
     src: url(../resources/Fipps-Regular.otf) format("opentype");
 }
 
-footer {
-    width: 100%;
-    padding: 10px;
+html, body {
+    margin: 0;
+}
+
+body {
+    padding: 8px;
 }
 
 .pixel-font {
@@ -14,4 +17,14 @@ footer {
 
 .text-center {
     text-align: center;
+}
+
+.container-video {
+    width: 800px;
+}
+
+@media (max-width: 600px) {
+    .container-video {
+        width: 100%;
+    }
 }
