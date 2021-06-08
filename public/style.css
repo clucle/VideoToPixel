@@ -34,8 +34,9 @@ h2 {
   text-align: center;
 }
 
-.container-margin-32px {
-  margin: 32px;
+.container-padding-32px {
+  padding: 32px;
+  box-sizing: border-box;
 }
 
 .container-video {
