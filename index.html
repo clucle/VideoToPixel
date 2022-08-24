@@ -29,7 +29,10 @@
         <option value="64">64</option>
         <option value="128">128</option>
       </select>
-      <h2>3. Enjoy.</h2>
+      <h2>3. Set update interval. ( 0ms ~ 1000ms )</h2>
+      <h2> - This will prevent frame drops</h2>
+      <input type="number" name="quantity" min="0" max="1000" onchange="changeInterval(this)" value="0">
+      <h2>4. Enjoy.</h2>
     </div>
     <br>
     <div class="container-center">
@@ -51,6 +54,7 @@
   let video, ctx_out, c_tmp, ctx_tmp;
   let doOnce = true;
   let pixel_size = 32;
+  let pixel_interval = 0;
 
   function readURL(input) {
     if (input.files && input.files[0]) {
@@ -69,6 +73,19 @@
       return;
     }
     pixel_size = pixel_size_num;
+  }
+
+  function changeInterval(event)
+  {
+    let pixel_interval_num = event.value * 1;
+    if (typeof pixel_interval_num != "number") {
+      alert("pixel size error");
+      return;
+    }
+    pixel_interval = pixel_interval_num;
+
+    if ( pixel_interval < 0 ) pixel_interval = 0;
+    if ( pixel_interval > 1000 ) pixel_interval = 1000;
   }
 
   function init() {
@@ -113,7 +130,7 @@
     }
 
     ctx_out.putImageData(frame, 0, 0);
-    setTimeout(computeFrame, 0);
+    setTimeout(computeFrame, pixel_interval);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
