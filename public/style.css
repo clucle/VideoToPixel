@@ -13,7 +13,7 @@ body {
 }
 
 footer {
-    text-align: right;
+  text-align: right;
 }
 
 h1,
@@ -40,7 +40,7 @@ h2 {
 }
 
 .container-video {
-  width: 800px;
+  width: auto;
 }
 
 .container-width-fluid {

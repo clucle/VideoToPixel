@@ -1,141 +1,166 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <title>Pixel Video Generator</title>
-  <meta name="description" content="Convert Video to PixelVideo">
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=800">
-  <link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
-  <link rel="stylesheet" type="text/css" href="public/style.css">
-</head>
+  <head>
+    <title>Pixel Video Generator</title>
+    <meta name="description" content="Convert Video to PixelVideo">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=800">
+    <link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
+    <link rel="stylesheet" type="text/css" href="public/style.css">
+  </head>
 
-<body>
-  <div>
-    <h1 class="pixel-font text-center">Convert Video To Pixel</h1>
-    <div class="container-padding-32px container-width-fluid ">
-      <h2>1. Select the video to be pixelated.</h2>
-      <input type="file" onchange="readURL(this);"></input>
-      <h2>2. Set pixel size.</h2>
-      <select id="pixel-size" onchange="changePixelSize(this);">
+  <body>
+    <div>
+      <h1 class="pixel-font text-center">Convert Video To Pixel</h1>
+      <div class="container-padding-32px container-width-fluid ">
+        <h2>1. Select the video to be pixelated.</h2>
+        <input type="file" onchange="readURL(this);"></input>
+        <h2>2. Set pixel size.</h2>
+        <select id="pixel-size" onchange="changePixelSize(this);">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="4">4</option>
         <option value="8">8</option>
         <option value="16">16</option>
-        <option value="32">32</option>
-        <option value="48" selected>48</option>
+        <option value="32" selected>32</option>
+        <option value="48">48</option>
         <option value="64">64</option>
         <option value="128">128</option>
       </select>
-      <h2>3. Set update interval. ( 0ms ~ 1000ms )</h2>
-      <h2> - This will prevent frame drops</h2>
-      <input type="number" name="quantity" min="0" max="1000" onchange="changeInterval(this)" value="0">
-      <h2>4. Enjoy.</h2>
+        <h2>3. Set update interval. ( 0ms ~ 1000ms )</h2>
+        <h2> - This will prevent frame drops</h2>
+        <input type="number" name="quantity" min="0" max="1000" onchange="changeInterval(this)" value="0">
+        <h2>4. (Optional) Fit the video</h2>
+        <button type="button" onClick="fitVideoSize(this)">Fit the video</button>
+        <h2>4. Enjoy.</h2>
+      </div>
+      <br>
+      <div class="container-center">
+        <video id="video" class="container-video" width="800" height="450" src="resources/sample.mp4" muted controls webkit-playsinline playsinline></video>
+        <canvas id="output-canvas" class="container-video" width="800" height="450"></canvas>
+      </div>
     </div>
     <br>
-    <div class="container-center">
-      <video id="video" class="container-video" width="800" height="450" src="resources/sample.mp4" muted controls webkit-playsinline playsinline></video>
-      <canvas id="output-canvas" class="container-video" width="800" height="450"></canvas>
-    </div>
-  </div>
-  <br>
-  <footer>
-    <div class="container-padding-32px">
-      <small>source code : <a href="https://github.com/clucle/VideoToPixel">github</a></small>
-      <br>
-      <small>Copyright &copy; 2021 clucle. All Rights Reserved</small>
-    </div>
-  </footer>
-</body>
+    <footer>
+      <div class="container-padding-32px">
+        <small>source code : <a href="https://github.com/clucle/VideoToPixel">github</a></small>
+        <br>
+        <small>Copyright &copy; 2021 clucle. All Rights Reserved</small>
+      </div>
+    </footer>
+  </body>
 
-<script>
-  let video, ctx_out, c_tmp, ctx_tmp;
-  let doOnce = true;
-  let pixel_size = 32;
-  let pixel_interval = 0;
+  <script>
+    let video, canvas, ctx_out, c_tmp, ctx_tmp;
+    let doOnce = true;
+    let pixel_size = 32;
+    let pixel_interval = 0;
 
-  function readURL(input) {
-    if (input.files && input.files[0]) {
-      let reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById("video").setAttribute("src", e.target.result);
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-
-  function changePixelSize(event) {
-    let pixel_size_num = event.value * 1;
-    if (typeof pixel_size_num != "number") {
-      alert("pixel size error");
-      return;
-    }
-    pixel_size = pixel_size_num;
-  }
-
-  function changeInterval(event)
-  {
-    let pixel_interval_num = event.value * 1;
-    if (typeof pixel_interval_num != "number") {
-      alert("pixel size error");
-      return;
-    }
-    pixel_interval = pixel_interval_num;
-
-    if ( pixel_interval < 0 ) pixel_interval = 0;
-    if ( pixel_interval > 1000 ) pixel_interval = 1000;
-  }
-
-  function init() {
-    video = document.getElementById("video");
-    ctx_out = document.getElementById("output-canvas").getContext("2d");
-
-    canvas_tmp = document.createElement("canvas");
-    canvas_tmp.setAttribute("width", 800);
-    canvas_tmp.setAttribute("height", 450);
-    ctx_tmp = canvas_tmp.getContext("2d");
-
-    video.addEventListener("play", computeFrame);
-  }
-
-  function computeFrame() {
-
-    let videoRatio = video.videoWidth / video.videoHeight;
-    let width = video.offsetWidth;
-    let height = video.offsetHeight;
-    let elmementRatio = width / height;
-
-    if (elmementRatio > videoRatio)
-      width = height * videoRatio;
-    else
-      height = width / videoRatio;
-
-    ctx_tmp.drawImage(video, 0, 0, width, height);
-    let frame = ctx_tmp.getImageData(0, 0, width, height);
-
-    for (let i = 0; i < frame.data.length / 4; i++) {
-      let y = Math.floor(Math.floor(i / width) / pixel_size) * pixel_size;
-      let x = Math.floor(Math.floor(i % width) / pixel_size) * pixel_size;
-      let pos_src = Math.floor(y * width + x);
-
-      let r = frame.data[i * 4 + 0];
-      let g = frame.data[i * 4 + 1];
-      let b = frame.data[i * 4 + 2];
-
-      frame.data[i * 4 + 0] = frame.data[pos_src * 4 + 0];
-      frame.data[i * 4 + 1] = frame.data[pos_src * 4 + 1];
-      frame.data[i * 4 + 2] = frame.data[pos_src * 4 + 2];
+    function readURL(input) {
+      if (input.files && input.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("video").setAttribute("src", e.target.result);
+          console.log(e.target.result);
+          console.log(document.getElementById("video"));
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
     }
 
-    ctx_out.putImageData(frame, 0, 0);
-    setTimeout(computeFrame, pixel_interval);
-  }
+    function changePixelSize(event) {
+      let pixel_size_num = event.value * 1;
+      if (typeof pixel_size_num != "number") {
+        alert("pixel size error");
+        return;
+      }
+      pixel_size = pixel_size_num;
+    }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    init();
-  });
-</script>
+    function changeInterval(event) {
+      let pixel_interval_num = event.value * 1;
+      if (typeof pixel_interval_num != "number") {
+        alert("pixel size error");
+        return;
+      }
+      pixel_interval = pixel_interval_num;
+
+      if (pixel_interval < 0) pixel_interval = 0;
+      if (pixel_interval > 1000) pixel_interval = 1000;
+    }
+
+    function fitVideoSize(event) {
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+
+      video.width = width;
+      video.height = height;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      canvas_tmp.width = width;
+      canvas_tmp.height = height;
+    }
+
+    function init() {
+      video = document.getElementById("video");
+      canvas = document.getElementById("output-canvas");
+      ctx_out = document.getElementById("output-canvas").getContext("2d");
+
+      canvas_tmp = document.createElement("canvas");
+      canvas_tmp.setAttribute("width", 800);
+      canvas_tmp.setAttribute("height", 450);
+      ctx_tmp = canvas_tmp.getContext("2d");
+
+      video.addEventListener("play", computeFrame);
+    }
+
+    function computeFrame() {
+
+      const start_time = new Date();
+
+      let videoRatio = video.videoWidth / video.videoHeight;
+      let width = video.offsetWidth;
+      let height = video.offsetHeight;
+      let elmementRatio = width / height;
+
+      if (elmementRatio > videoRatio)
+        width = height * videoRatio;
+      else
+        height = width / videoRatio;
+
+      ctx_tmp.drawImage(video, 0, 0, width, height);
+      let frame = ctx_tmp.getImageData(0, 0, width, height);
+
+      for (let i = 0; i < frame.data.length / 4; i++) {
+        let y = Math.floor(Math.floor(i / width) / pixel_size) * pixel_size;
+        let x = Math.floor(Math.floor(i % width) / pixel_size) * pixel_size;
+        let pos_src = Math.floor(y * width + x);
+
+        let r = frame.data[i * 4 + 0];
+        let g = frame.data[i * 4 + 1];
+        let b = frame.data[i * 4 + 2];
+
+        frame.data[i * 4 + 0] = frame.data[pos_src * 4 + 0];
+        frame.data[i * 4 + 1] = frame.data[pos_src * 4 + 1];
+        frame.data[i * 4 + 2] = frame.data[pos_src * 4 + 2];
+      }
+
+      ctx_out.putImageData(frame, 0, 0);
+
+      const end_time = new Date();
+      const diff = end_time - start_time;
+      const next_time = Math.max(pixel_interval - diff, 0);
+
+      setTimeout(computeFrame, next_time);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
+    });
+  </script>
 
 </html>
